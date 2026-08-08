@@ -37,6 +37,17 @@ The central objective is to reduce the information bottleneck faced by emergency
 
 ---
 
+| **Flood Detection** |
+|:---:|
+| <img width="866" height="410" alt="Screenshot 2026-08-08 115459" src="https://github.com/user-attachments/assets/6f64a8a8-5329-4062-8fcc-6dd0a51e1cc3" /> | 
+
+
+| **Landslide Detection** | **Image segment** |
+|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/0331c492-fc5d-4b2b-abae-30276bfef8a2" width="400"> | <img src="https://github.com/user-attachments/assets/78218063-ac20-4ea6-a6ae-4a7e9f8b7f15" width="400"> |
+
+
+
 
 Floods and landslides generate rapidly changing conditions, particularly in geographically vulnerable regions such as North Bengal and other mountainous and riverine areas.
 
