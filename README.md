@@ -23,7 +23,7 @@
 
 ---
 
-## 1. Project Overview
+## Project Overview
 
 **C.A.S.C.A.D.E. V12** is a multi-hazard disaster intelligence platform designed to assist emergency response teams in detecting, assessing, and prioritizing disaster zones from visual and contextual information.
 
@@ -37,7 +37,6 @@ The central objective is to reduce the information bottleneck faced by emergency
 
 ---
 
-# 2. Problem Statement
 
 Floods and landslides generate rapidly changing conditions, particularly in geographically vulnerable regions such as North Bengal and other mountainous and riverine areas.
 
@@ -55,7 +54,6 @@ C.A.S.C.A.D.E. addresses this gap by connecting **visual detection → spatial i
 
 ---
 
-# 3. Proposed Solution
 
 C.A.S.C.A.D.E. uses a specialized multi-stage architecture for disaster intelligence.
 
