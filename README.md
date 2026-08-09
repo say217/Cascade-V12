@@ -28,6 +28,8 @@
 
 
 
+**Vedio Link**  - https://drive.google.com/file/d/1Yf8KKF8-080IIoKxIBcHw_vNiCS2ikg0/view?usp=sharing
+
 ## Project Overview
 
 **C.A.S.C.A.D.E. V12** is a multi-hazard disaster intelligence platform designed to assist emergency response teams in detecting, assessing, and prioritizing disaster zones from visual and contextual information.
