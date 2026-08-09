@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App2 - Sign Up</title>
+</head>
+<body>
+    <h1>Sign Up</h1>
+    <nav></nav>
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="/app2/signup">
+        <div>
+            <label>Email</label><br />
+            <input type="email" name="email" required />
+        </div>
+        <div>
+            <label>Username</label><br />
+            <input type="text" name="username" required />
+        </div>
+        <div>
+            <label>Password</label><br />
+            <input type="password" name="password" required />
+        </div>
+        <button type="submit">Create account</button>
+    </form>
+
+    <p>Already have an account? <a href="/app2/login">Log in</a>.</p>
+</body>
+</html>

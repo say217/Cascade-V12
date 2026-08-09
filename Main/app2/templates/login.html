@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App2 - Login</title>
+</head>
+<body>
+    <h1>Log In</h1>
+    <nav></nav>
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="/app2/login">
+        <div>
+            <label>Email</label><br />
+            <input type="email" name="email" value="{{ email or '' }}" required />
+        </div>
+        <div>
+            <label>Password</label><br />
+            <input type="password" name="password" required />
+        </div>
+        <button type="submit">Log in</button>
+    </form>
+
+    <p>Don't have an account? <a href="/app2/signup">Create one</a>.</p>
+</body>
+</html>

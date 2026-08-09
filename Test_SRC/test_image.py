@@ -62,4 +62,4 @@ for box in boxes:
 plt.figure(figsize=(12, 12))
 plt.imshow(img_rgb)
 plt.axis('off')
-plt.show()
+plt.show() 
