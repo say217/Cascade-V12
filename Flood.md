@@ -5,7 +5,15 @@
 | <img width="866" height="410" alt="Screenshot 2026-08-08 115459" src="https://github.com/user-attachments/assets/6f64a8a8-5329-4062-8fcc-6dd0a51e1cc3" /> | 
 
 
+
+vedio Link `https://drive.google.com/file/d/1CHiD23Fk20yjs8NnvMX3EnukZVW35cq3/view?usp=sharing`
+
+
+
 The drone-based flood detection engine automates the critical process of monitoring large-scale disaster zones by utilizing a fine-tuned YOLOv12 object detection model to instantly scan video streams, bypassing the limitations of human fatigue and restricted operational scale. In active emergency scenarios, manually tracking thousands of hours of aerial footage is structurally impossible, leading to critical delay blind spots in mapping submerged infrastructure. This system solves that exact bottlenecks by transforming raw pixel data into real-time, quantifiable bounding coordinates, enabling emergency dispatch teams to instantly identify flooded roadways, track rising water boundaries dynamically, and deploy life-saving rescue assets with automated, machine-level speed and precision.
+
+
+![Screenshot](https://i.postimg.cc/0yTkjJff/Screenshot-2026-08-09-163005.png)
 
 ## Traing Configurations
 

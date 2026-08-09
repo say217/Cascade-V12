@@ -1,7 +1,9 @@
 import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from .app1.routes import router as app1_router
@@ -16,8 +18,15 @@ try:
 except ImportError:
     pass
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ASSETS_DIR = PROJECT_ROOT / "Assets"
+STATIC_DIR = PROJECT_ROOT / "static"
+
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "change-me"))
+
+app.mount("/Assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Include routers
 app.include_router(app1_router, prefix="/app1")
