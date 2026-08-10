@@ -630,6 +630,196 @@
   @media (prefers-reduced-motion:reduce){
     .loader-spinner, .loader-spinner .arc{ animation:none !important; }
   }
+
+  /* ============================================================
+     PRESENTATION LAYER — depth, glass, motion, small 3D accents
+     Layered treatment only. Hero section is untouched above this
+     point; every rule below targets sections after the hero.
+     ============================================================ */
+  :root{
+    --accent:#8FE3FF;
+    --accent-soft:rgba(143,227,255,0.5);
+    --accent-dim:rgba(143,227,255,0.16);
+    --glass-top:rgba(255,255,255,0.05);
+    --glass-bottom:rgba(255,255,255,0.012);
+    --glass-border:rgba(255,255,255,0.09);
+    --depth-shadow:0 22px 54px -22px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.035);
+    --depth-shadow-hover:0 30px 70px -22px rgba(0,0,0,0.78), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 26px -8px var(--accent-dim);
+  }
+
+  /* Ambient drifting glow behind every post-hero section */
+  main > section:not(.hero){ overflow:hidden; }
+  main > section:not(.hero)::before{
+    content:"";
+    position:absolute; inset:0; z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(560px 280px at 12% -10%, rgba(255,255,255,0.05), transparent 62%),
+      radial-gradient(480px 260px at 92% 110%, rgba(143,227,255,0.05), transparent 60%);
+    background-repeat:no-repeat;
+    background-size:140% 140%;
+    animation:driftBG 30s ease-in-out infinite;
+    opacity:0.85;
+  }
+  main > section:not(.hero) > .wrap{ position:relative; z-index:1; }
+  @keyframes driftBG{
+    0%,100%{ background-position:0% 0%, 100% 100%; }
+    50%{ background-position:14% 8%, 84% 90%; }
+  }
+
+  /* ---------- Small 3D accents (supporting only, never in hero) ---------- */
+  .accent-3d{
+    position:absolute;
+    z-index:0;
+    pointer-events:none;
+    filter:drop-shadow(0 10px 22px rgba(0,0,0,0.55));
+  }
+  .accent-orbit{ animation:orbitSpin 22s linear infinite; transform-origin:50% 50%; }
+  @keyframes orbitSpin{ to{ transform:rotate(360deg); } }
+  .accent-float{ animation:floatDrift 7.5s var(--ease) infinite; transform-style:preserve-3d; }
+  @keyframes floatDrift{
+    0%,100%{ transform:perspective(600px) translateY(0) rotateX(10deg) rotateY(0deg); }
+    50%{ transform:perspective(600px) translateY(-9px) rotateX(10deg) rotateY(16deg); }
+  }
+  @media (max-width:900px){ .accent-3d{ display:none; } }
+
+  /* ---------- Problem section → operational alert tiles ---------- */
+  .problem-card{
+    position:relative;
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+    box-shadow:var(--depth-shadow);
+    transform-style:preserve-3d;
+    perspective:800px;
+    will-change:transform;
+    transition:transform .5s var(--ease), border-color .35s ease, box-shadow .5s var(--ease), background .35s ease;
+  }
+  .problem-card::after{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:inherit;
+    background:linear-gradient(135deg, rgba(255,255,255,0.14), transparent 45%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    padding:1px;
+    opacity:0;
+    transition:opacity .35s ease;
+    pointer-events:none;
+  }
+  .problem-card:hover{
+    box-shadow:var(--depth-shadow-hover);
+    border-color:var(--border-strong);
+  }
+  .problem-card:hover::after{ opacity:1; }
+  .problem-card svg{ transition:transform .4s var(--ease), color .3s ease; }
+  .problem-card:hover svg{ transform:translateZ(18px) scale(1.05); color:var(--text-max); }
+
+  /* ---------- Pipeline → mission steps ---------- */
+  .pipeline::before{
+    background:linear-gradient(90deg, transparent, var(--border-strong) 12%, var(--border-strong) 88%, transparent);
+    box-shadow:0 0 14px -2px var(--accent-dim);
+  }
+  .stage{
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), rgba(255,255,255,0.01);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:var(--depth-shadow);
+    transition:transform .45s var(--ease), border-color .3s ease, box-shadow .45s var(--ease);
+  }
+  .stage:hover{
+    transform:translateY(-6px);
+    border-color:var(--border-strong);
+    box-shadow:var(--depth-shadow-hover);
+  }
+  .stage-index{
+    background:radial-gradient(circle at 34% 30%, var(--surface-3), var(--bg) 72%);
+    box-shadow:0 8px 18px -8px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
+    transition:border-color .3s ease, box-shadow .35s ease;
+  }
+  .stage:hover .stage-index{
+    box-shadow:0 10px 22px -8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.09), 0 0 18px -4px var(--accent-dim);
+  }
+
+  /* ---------- Detection → live analysis windows ---------- */
+  .detect-card{
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+    box-shadow:var(--depth-shadow);
+    transition:border-color .35s ease, box-shadow .5s var(--ease), transform .5s var(--ease);
+  }
+  .detect-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--depth-shadow-hover);
+  }
+  .detect-media .placeholder{
+    transition:transform .7s var(--ease);
+    will-change:transform;
+  }
+  .bbox-tag{ box-shadow:0 4px 12px -4px rgba(0,0,0,0.5); }
+  .bbox{ transition:opacity .4s ease, box-shadow .4s ease; }
+  .detect-card:hover .bbox{ box-shadow:0 0 16px -4px var(--accent-dim); }
+
+  /* ---------- Context / terrain → intelligence briefing panel ---------- */
+  .context-media{
+    position:relative;
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+    box-shadow:var(--depth-shadow);
+  }
+  .context-media::before{
+    content:"";
+    position:absolute; inset:16px;
+    border:1px solid var(--border);
+    border-radius:calc(var(--r-lg) - 12px);
+    pointer-events:none;
+  }
+  .context-media::after{
+    content:"";
+    position:absolute; inset:-20px;
+    z-index:-1;
+    border-radius:calc(var(--r-lg) + 20px);
+    background:radial-gradient(420px 240px at 28% 15%, var(--accent-dim), transparent 72%);
+    filter:blur(8px);
+    opacity:0.6;
+  }
+
+  /* ---------- Tech stack → modular system components ---------- */
+  .stack-card{
+    position:relative;
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+    box-shadow:var(--depth-shadow);
+    transform-style:preserve-3d;
+    perspective:700px;
+    will-change:transform;
+    transition:transform .5s var(--ease), border-color .3s ease, box-shadow .5s var(--ease);
+  }
+  .stack-card:hover{
+    border-color:var(--border-strong);
+    box-shadow:var(--depth-shadow-hover);
+  }
+  .stack-card.is-active{
+    border-color:var(--border-strong);
+    box-shadow:0 28px 58px -20px rgba(0,0,0,0.78), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 30px -6px var(--accent-dim);
+  }
+  .stack-card svg{ transition:transform .4s var(--ease); }
+  .stack-card:hover svg{ transform:translateZ(14px) scale(1.04); }
+
+  /* ---------- CTA → command prompt ---------- */
+  .cta-section{
+    position:relative;
+    background:radial-gradient(760px 340px at 50% 0%, rgba(255,255,255,0.05), transparent 72%);
+  }
+  .cta-section::before{
+    content:"";
+    position:absolute; left:50%; top:0; transform:translateX(-50%);
+    width:1px; height:60px;
+    background:linear-gradient(180deg, transparent, var(--accent-soft), transparent);
+    animation:ctaPulse 3.4s ease-in-out infinite;
+  }
+  @keyframes ctaPulse{ 0%,100%{ opacity:.22; } 50%{ opacity:.95; } }
+  .cta-actions .btn-primary{ box-shadow:0 18px 40px -16px rgba(0,0,0,0.6); }
+
+  @media (prefers-reduced-motion:reduce){
+    .accent-orbit, .accent-float, main > section:not(.hero)::before, .cta-section::before{ animation:none !important; }
+  }
 </style>
 </head>
 <body>
