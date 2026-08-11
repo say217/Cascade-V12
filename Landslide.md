@@ -6,6 +6,8 @@
 
 The proposed system is a **hybrid deep-learning architecture** for landslide detection and segmentation from satellite, aerial, and drone imagery. Currently, the project is in the **training and development phase**. The main objective is to detect landslide regions and generate **pixel-level segmentation masks** for accurate localization.
 
+![Screenshot](https://i.postimg.cc/QtbPJTGH/Screenshot-2026-08-11-163759.png)
+
 ## System Architecture
 
 The overall pipeline is:
