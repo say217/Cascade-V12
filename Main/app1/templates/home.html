@@ -260,7 +260,6 @@
     padding-top:180px;
     padding-bottom:var(--sp-96);
     overflow:hidden;
-    border-bottom:1px solid var(--border);
   }
   .hero-media{ position:absolute; inset:0; z-index:0; background:var(--surface); }
   .hero-media video{ width:100%; height:100%; object-fit:cover; opacity:0.35; filter:grayscale(1) contrast(1.05); }
@@ -301,22 +300,6 @@
   }
   .hero-coords span b{ color:var(--text-soft); font-weight:400; }
 
-  .stack-strip{
-    display:flex; align-items:center; gap:var(--sp-32); flex-wrap:wrap;
-    padding-top:var(--sp-32);
-    border-top:1px solid var(--border);
-  }
-  .stack-strip .label-small{ margin-right:var(--sp-8); }
-  .stack-tag{
-    font-family:var(--font-mono);
-    font-size:12px; color:var(--text-dim);
-    display:flex; align-items:center; gap:8px;
-    transition:color .2s ease;
-  }
-  .stack-tag:hover{ color:var(--text-max); }
-  .stack-tag::before{ content:"/"; color:var(--border-strong); }
-  .stack-tag:first-of-type::before{ content:""; }
-
   @media (max-width:767px){
     .hero{ padding-top:130px; }
     .hero-top-row{ flex-direction:column; align-items:flex-start; gap:var(--sp-24); }
@@ -325,7 +308,6 @@
 
   /* ============ Sections generic ============ */
   section{ position:relative; padding:calc(var(--sp-160) + 20px) 0; }
-  section + section{ border-top:1px solid var(--border); }
   .section-head{
     display:flex; justify-content:space-between; align-items:flex-end;
     gap:var(--sp-48); margin-bottom:calc(var(--sp-96) + 16px);
@@ -498,11 +480,13 @@
   .context-media{
     aspect-ratio:5/4;
     min-height:520px;
-    border-radius:var(--r-lg);
-    border:1px solid var(--border);
-    display:flex; align-items:center; justify-content:center;
+    border-radius:0;
+    border:none;
+    display:flex; align-items:stretch; justify-content:stretch;
     position:relative;
-    background:var(--surface);
+    background:transparent;
+    overflow:hidden;
+    box-shadow:none;
   }
   .context-media .placeholder{ display:flex; flex-direction:column; align-items:center; gap:var(--sp-12); text-align:center; padding:0 var(--sp-32); }
   .context-media .placeholder svg{ width:30px; height:30px; color:var(--text-dim); }
@@ -538,7 +522,7 @@
   /* ============ CTA / Footer ============ */
   .cta-section{ text-align:center; padding:calc(var(--sp-120) + 20px) 0; }
   .cta-section h2{ max-width:640px; margin:0 auto var(--sp-24); }
-  .cta-section > .wrap > p{ margin:0 auto var(--sp-48); }
+  .cta-section .cta-content > p{ margin:0 auto var(--sp-48); }
   .cta-actions{ display:flex; justify-content:center; gap:var(--sp-20); flex-wrap:wrap; }
 
   footer{ padding:calc(var(--sp-64) + 12px) 0 var(--sp-32); border-top:1px solid var(--border); }
@@ -774,24 +758,16 @@
   /* ---------- Context / terrain → intelligence briefing panel ---------- */
   .context-media{
     position:relative;
-    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
-    box-shadow:var(--depth-shadow);
+    background:transparent;
+    box-shadow:none;
   }
   .context-media::before{
     content:"";
-    position:absolute; inset:16px;
-    border:1px solid var(--border);
-    border-radius:calc(var(--r-lg) - 12px);
-    pointer-events:none;
+    display:none;
   }
   .context-media::after{
     content:"";
-    position:absolute; inset:-20px;
-    z-index:-1;
-    border-radius:calc(var(--r-lg) + 20px);
-    background:radial-gradient(420px 240px at 28% 15%, var(--accent-dim), transparent 72%);
-    filter:blur(8px);
-    opacity:0.6;
+    display:none;
   }
 
   /* ---------- Tech stack → modular system components ---------- */
@@ -832,6 +808,421 @@
 
   @media (prefers-reduced-motion:reduce){
     .accent-orbit, .accent-float, main > section:not(.hero)::before, .cta-section::before{ animation:none !important; }
+  }
+
+  /* ============================================================
+     HERO H1 — Character Tween hover interaction (GSAP-powered).
+     Each character sits inside a masked, two-line flip: the
+     visible glyph tweens up and out while its duplicate tweens
+     up and in behind it, staggered across the headline.
+     ============================================================ */
+  .hero-headline h1{ cursor:default; }
+  .hero-headline h1 .ct-word{
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .hero-headline h1 .ct-char{
+    position:relative;
+    display:inline-block;
+    overflow:hidden;
+    vertical-align:top;
+  }
+  .hero-headline h1 .ct-char-inner{
+    display:block;
+  }
+  .hero-headline h1 .ct-char-top,
+  .hero-headline h1 .ct-char-bottom{
+    display:block;
+    will-change:transform;
+  }
+  .hero-headline h1 .ct-char-bottom{
+    position:absolute;
+    top:100%;
+    left:0;
+    color:var(--accent, #8FE3FF);
+    text-shadow:0 0 18px rgba(143,227,255,0.35);
+  }
+
+  /* ============================================================
+     VIDEO GALLERY — automated left-to-right marquee, immediately
+     after the hero. Same monochrome + glass language as the rest
+     of the page.
+     ============================================================ */
+  .video-gallery{
+    position:relative;
+    padding:var(--sp-64) 0;
+    overflow:hidden;
+  }
+  .video-gallery .gallery-title{
+    margin:0 0 var(--sp-32);
+    max-width:880px;
+    font-size:clamp(30px, 4vw, 54px);
+    line-height:1.06;
+    letter-spacing:-0.03em;
+  }
+  .video-gallery .gallery-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:var(--sp-24); margin-bottom:var(--sp-40);
+  }
+  .video-gallery .gallery-head .eyebrow{ margin-bottom:0; }
+  .video-gallery .gallery-head .sys-line{ flex-shrink:0; }
+
+  .gallery-viewport{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+  }
+  .gallery-track{
+    display:flex;
+    align-items:stretch;
+    gap:var(--sp-24);
+    width:max-content;
+    will-change:transform;
+    animation:gallerySlide 46s linear infinite;
+  }
+  .gallery-viewport:hover .gallery-track{ animation-play-state:paused; }
+  @keyframes gallerySlide{
+    from{ transform:translateX(-50%); }
+    to{ transform:translateX(0%); }
+  }
+
+  .gallery-card{
+    position:relative;
+    flex:0 0 auto;
+    width:clamp(320px, 38vw, 540px);
+    aspect-ratio:16/9;
+    border-radius:var(--r-lg);
+    overflow:hidden;
+    background:linear-gradient(160deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+    box-shadow:var(--depth-shadow);
+    transform:translateZ(0) scale(1);
+    transition:transform .5s var(--ease), border-color .4s ease, box-shadow .5s var(--ease);
+  }
+  .gallery-card:hover{
+    transform:translateY(-6px) scale(1.025);
+    border-color:var(--border-strong);
+    box-shadow:var(--depth-shadow-hover);
+  }
+  .gallery-card video{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    filter:grayscale(0.85) contrast(1.05) brightness(0.85);
+    transition:filter .6s var(--ease), transform .8s var(--ease);
+  }
+  .gallery-card:hover video{
+    filter:grayscale(0.55) contrast(1.08) brightness(1);
+    transform:scale(1.04);
+  }
+  .gallery-card-caption{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    padding:var(--sp-20) var(--sp-20) var(--sp-18);
+    background:linear-gradient(180deg, rgba(3,6,10,0), rgba(3,6,10,0.82));
+    pointer-events:none;
+  }
+  .gallery-card-caption .card-title{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0.45px;
+    color:var(--text-max);
+    text-transform:uppercase;
+  }
+  .gallery-card-caption .card-copy{
+    font-size:14px;
+    line-height:1.45;
+    color:var(--text-soft);
+    max-width:320px;
+  }
+  .gallery-card .gallery-empty{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:var(--sp-16);
+    background:linear-gradient(180deg, rgba(5,8,12,0.22), rgba(5,8,12,0.58));
+    border:0;
+    margin:0;
+    border-radius:inherit;
+  }
+  .gallery-card .gallery-empty svg{ width:26px; height:26px; color:var(--text-dim); }
+  .gallery-card .gallery-empty span{
+    font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.3px;
+    color:var(--text-dim); text-align:center; padding:0 var(--sp-20); line-height:15px;
+  }
+
+  @media (max-width:900px){
+    .video-gallery .gallery-title{ font-size:clamp(26px, 6vw, 40px); }
+    .gallery-card{ width:clamp(280px, 72vw, 420px); }
+  }
+  @media (max-width:600px){
+    .video-gallery .gallery-head{ flex-direction:column; align-items:flex-start; gap:var(--sp-16); }
+  }
+
+  /* ============================================================
+     CTA content — single fade+blur reveal wrapper, same pattern
+     as .section-head.reveal used elsewhere on the page.
+     ============================================================ */
+  .cta-content.reveal{ display:flex; flex-direction:column; align-items:center; }
+
+  /* ============================================================
+     VIDEO CARDS — premium treatment. Layered glass surface,
+     brushed-metal frame, gold-tinted accent line, refined type
+     and micro-interactions consistent with the rest of the
+     monochrome + accent system used site-wide.
+     ============================================================ */
+  .vi-gallery-section {
+    background:
+      radial-gradient(900px 420px at 15% -8%, rgba(255,255,255,0.05), transparent 60%),
+      radial-gradient(700px 380px at 88% 108%, var(--accent-dim), transparent 62%),
+      #060606;
+    font-family: 'Inter', sans-serif;
+    color: #f2f2f0;
+    padding: clamp(64px, 9vw, 128px) 0;
+    overflow: hidden;
+    position: relative;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .vi-gallery-header {
+    max-width: 1280px;
+    margin: 0 auto 28px;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-20);
+  }
+  .vi-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4.4vw, 62px);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    font-weight: 500;
+    max-width: 1120px;
+    color: var(--text-max);
+  }
+  .vi-track-wrapper {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+  }
+  .vi-track {
+    display: flex;
+    gap: 28px;
+    width: max-content;
+    padding: 10px 24px 4px;
+    list-style: none;
+    margin: 0;
+    animation-name: vi-scroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: 60s;
+    will-change: transform;
+  }
+  .vi-carousel.vi-paused .vi-track,
+  .vi-reduced-motion .vi-track {
+    animation-play-state: paused;
+  }
+  .vi-reduced-motion .vi-track {
+    animation: none;
+    transform: none;
+  }
+  @keyframes vi-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .vi-card {
+    position: relative;
+    flex: 0 0 var(--vi-card-w, 494px);
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.008) 55%),
+      linear-gradient(200deg, #17181a, #0b0c0d 78%);
+    border-radius: 28px;
+    padding: 12px 12px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.06) inset,
+      0 28px 60px -26px rgba(0, 0, 0, 0.85),
+      0 6px 18px -10px rgba(0, 0, 0, 0.6);
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), border-color 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .vi-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:linear-gradient(140deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, var(--accent-soft) 130%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    opacity:0.55;
+    transition:opacity .5s ease;
+    pointer-events:none;
+  }
+  .vi-card:hover,
+  .vi-card:focus-within {
+    transform: translateY(-8px) scale(1.012);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.09) inset,
+      0 40px 80px -26px rgba(0, 0, 0, 0.9),
+      0 0 40px -12px var(--accent-dim);
+  }
+  .vi-card:hover::before,
+  .vi-card:focus-within::before{ opacity:1; }
+  .vi-video-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0a0a0b;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4), inset 0 30px 50px -30px rgba(0,0,0,0.9);
+  }
+  .vi-video-frame::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+    pointer-events:none;
+  }
+  .vi-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(0.9) contrast(1.08) brightness(0.88);
+    transition: filter 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+    background: #0a0a0b;
+  }
+  .vi-card:hover .vi-video,
+  .vi-card:focus-within .vi-video {
+    filter: grayscale(0.62) contrast(1.12) brightness(1.02);
+    transform: scale(1.035);
+  }
+  .vi-frame-marks span {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    transition: opacity 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .vi-card:hover .vi-frame-marks span,
+  .vi-card:focus-within .vi-frame-marks span {
+    opacity: 0.9;
+  }
+  .vi-frame-marks .tl { top: 14px; left: 14px; border-top: 1.5px solid var(--accent, #8FE3FF); border-left: 1.5px solid var(--accent, #8FE3FF); transform: translate(-4px, -4px); }
+  .vi-frame-marks .tr { top: 14px; right: 14px; border-top: 1.5px solid var(--accent, #8FE3FF); border-right: 1.5px solid var(--accent, #8FE3FF); transform: translate(4px, -4px); }
+  .vi-frame-marks .bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid var(--accent, #8FE3FF); border-left: 1.5px solid var(--accent, #8FE3FF); transform: translate(-4px, 4px); }
+  .vi-frame-marks .br { bottom: 14px; right: 14px; border-bottom: 1.5px solid var(--accent, #8FE3FF); border-right: 1.5px solid var(--accent, #8FE3FF); transform: translate(4px, 4px); }
+  .vi-card:hover .vi-frame-marks .tl,
+  .vi-card:hover .vi-frame-marks .tr,
+  .vi-card:hover .vi-frame-marks .bl,
+  .vi-card:hover .vi-frame-marks .br {
+    transform: translate(0, 0);
+  }
+  .vi-view-tag {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .vi-card:hover .vi-view-tag,
+  .vi-card:focus-within .vi-view-tag {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .vi-view-tag::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent, #8FE3FF);
+    box-shadow: 0 0 8px 1px var(--accent-soft);
+  }
+  .vi-index-tag{
+    position:absolute;
+    top:14px;
+    left:14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.75);
+    background: rgba(10,10,10,0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 5px 10px;
+  }
+  .vi-caption {
+    padding: 18px 10px 4px;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .vi-caption-text{ display:flex; flex-direction:column; gap:5px; }
+  .vi-caption-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-max);
+  }
+  .vi-caption-desc {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-mid);
+    max-width: 38ch;
+  }
+  .vi-caption-index{
+    flex-shrink:0;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding-top: 3px;
+  }
+  @media (max-width: 1180px) {
+    :root { --vi-card-w: 442px; }
+  }
+  @media (max-width: 860px) {
+    :root { --vi-card-w: 390px; }
+  }
+  @media (max-width: 640px) {
+    :root { --vi-card-w: 88vw; }
+    .vi-track { padding: 10px 16px 4px; }
+    .vi-gallery-header { padding: 0 16px 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vi-track { animation: none !important; }
   }
 </style>
 </head>
@@ -911,7 +1302,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
             <a href="#detection" class="btn btn-secondary">View Detection Models</a>
-            <span class="sys-line"><span class="sys-dot"></span>CASCADE CORE // ONLINE</span>
           </div>
         </div>
         <div class="hero-coords fade-line" style="animation-delay:3.15s">
@@ -921,27 +1311,26 @@
         </div>
       </div>
 
-      <div class="stack-strip">
-        <span class="label-small">Built with</span>
-        <span class="stack-tag">Python</span>
-        <span class="stack-tag">YOLO</span>
-        <span class="stack-tag">PyTorch</span>
-        <span class="stack-tag">OpenCV</span>
-        <span class="stack-tag">FastAPI</span>
-        <span class="stack-tag">SQLite</span>
-        <span class="stack-tag">Docker</span>
-        <span class="stack-tag">MLflow</span>
-        <span class="stack-tag">GitHub</span>
+    </div>
+  </section>
+
+  <section class="vi-gallery-section" aria-labelledby="vi-heading">
+    <div class="vi-gallery-header">
+      <h2 class="vi-heading" id="vi-heading">Problem face people due to natural disters</h2>
+    </div>
+
+    <div class="vi-carousel" id="vi-carousel">
+      <div class="vi-track-wrapper">
+        <ul class="vi-track" id="vi-track" role="region" aria-label="Video gallery"></ul>
       </div>
     </div>
   </section>
 
   <!-- ============ PROBLEM ============ -->
-  <section id="problem">
+  <section id="problem" style="margin-top:130px;">
     <div class="wrap">
       <div class="section-head reveal">
         <div>
-          <p class="eyebrow" style="margin-bottom:var(--sp-20)">The Operational Gap</p>
           <h2 class="h2">Detection alone does not tell a response team where to go next.</h2>
         </div>
         <p>Existing computer-vision systems confirm that a hazard is present within a frame. They stop short of the questions that determine how a response is actually coordinated.</p>
@@ -977,7 +1366,6 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div>
-          <p class="eyebrow" style="margin-bottom:var(--sp-20)">Intelligence Pipeline</p>
           <h2 class="h2">Detection is the first stage, not the final output.</h2>
         </div>
         <p>Every frame moves through four connected stages before it reaches a human operator, converting a single classification into a coordinated recommendation.</p>
@@ -1072,10 +1460,9 @@
     <div class="wrap">
       <div class="context reveal">
         <div class="context-media">
-          <div class="placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 2C8 6 6 10 6 13a6 6 0 0012 0c0-3-2-7-6-11z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Insert regional terrain map or satellite composite</span>
-          </div>
+          <video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;background:var(--bg);" poster="">
+            <source src="/static/vedio/14976635_1920_1080_30fps.mp4" type="video/mp4">
+          </video>
         </div>
         <div class="context-copy">
           <p class="eyebrow" style="margin-bottom:var(--sp-20)">Built For Terrain At Risk</p>
@@ -1170,15 +1557,17 @@
   <!-- ============ CTA ============ -->
   <section class="cta-section" id="access" style="margin-top:130px;">
     <div class="wrap">
-      <p class="eyebrow" style="justify-content:center; margin-bottom:var(--sp-20)">Deployment &amp; Access</p>
-      <h2 class="h2">Coordinate the response before conditions escalate.</h2>
-      <p style="max-width:480px;">C.A.S.C.A.D.E. is available for pilot deployment with emergency response units operating across flood- and landslide-prone terrain.</p>
-      <div class="cta-actions">
-        <a href="#" class="btn btn-primary">
-          Request Pilot Access
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="#" class="btn btn-secondary">View Technical Documentation</a>
+      <div class="cta-content reveal">
+        <p class="eyebrow" style="justify-content:center; margin-bottom:var(--sp-20)">Deployment &amp; Access</p>
+        <h2 class="h2">Coordinate the response before conditions escalate.</h2>
+        <p style="max-width:480px;">C.A.S.C.A.D.E. is available for pilot deployment with emergency response units operating across flood- and landslide-prone terrain.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-primary">
+            Request Pilot Access
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#" class="btn btn-secondary">View Technical Documentation</a>
+        </div>
       </div>
     </div>
   </section>
@@ -1227,6 +1616,7 @@
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
   /* ============================================================
      PAGE LOADER — simple boot sequence, no progress simulation
@@ -1267,17 +1657,70 @@
   })();
 
   /* ============================================================
-     HERO HEADLINE — split into word-reveal spans
+     HERO HEADLINE — word-reveal on load, then Character Tween
+     hover interaction (GSAP). Each glyph is duplicated into a
+     masked two-line stack; hovering a word tweens the visible
+     top line up and out while the accent-colored duplicate
+     tweens up and into view underneath it, staggered left to
+     right — the classic "Character Tween" flip.
      ============================================================ */
   (function splitHeroText(){
     const el = document.getElementById('heroTitle');
     if (!el) return;
     const text = el.textContent.trim();
     const words = text.split(' ');
-    el.innerHTML = words.map((w, i) => {
-      const delay = (2.35 + i * 0.09).toFixed(3);
-      return '<span class="word-reveal"><span class="word" style="animation-delay:' + delay + 's">' + w + '&nbsp;</span></span>';
+
+    el.innerHTML = words.map((w, wi) => {
+      const wordDelay = (2.35 + wi * 0.09).toFixed(3);
+      const chars = w.split('').map((ch) => {
+        const glyph = ch === ' ' ? '&nbsp;' : ch;
+        return (
+          '<span class="ct-char">' +
+            '<span class="ct-char-inner">' +
+              '<span class="ct-char-top">' + glyph + '</span>' +
+              '<span class="ct-char-bottom">' + glyph + '</span>' +
+            '</span>' +
+          '</span>'
+        );
+      }).join('');
+      return (
+        '<span class="word-reveal">' +
+          '<span class="word ct-word" style="animation-delay:' + wordDelay + 's">' + chars + '</span>' +
+        '</span>' +
+        '<span class="word-reveal"><span class="word" style="animation-delay:' + wordDelay + 's">&nbsp;</span></span>'
+      );
     }).join('');
+
+    // Character Tween hover — GSAP powered, falls back to no-op if GSAP fails to load
+    if (window.gsap) {
+      const words_ = el.querySelectorAll('.ct-word');
+      words_.forEach((wordEl) => {
+        const tops = wordEl.querySelectorAll('.ct-char-top');
+        const bottoms = wordEl.querySelectorAll('.ct-char-bottom');
+        gsap.set(bottoms, { yPercent: 0 });
+
+        let tl = null;
+        const play = (reverse) => {
+          if (tl) tl.kill();
+          tl = gsap.timeline();
+          tl.to(tops, {
+            yPercent: reverse ? 0 : -100,
+            duration: 0.5,
+            ease: 'power3.inOut',
+            stagger: reverse ? { each: 0.025, from: 'end' } : { each: 0.025, from: 'start' }
+          }, 0);
+          tl.to(bottoms, {
+            yPercent: reverse ? 0 : -100,
+            duration: 0.5,
+            ease: 'power3.inOut',
+            stagger: reverse ? { each: 0.025, from: 'end' } : { each: 0.025, from: 'start' }
+          }, 0);
+        };
+
+        wordEl.addEventListener('mouseenter', () => play(false));
+        wordEl.addEventListener('mouseleave', () => play(true));
+      });
+    }
   })();
 
   // Header scroll state
@@ -1314,6 +1757,232 @@
   if (heroVideo.currentSrc || heroVideo.querySelector('source[src]')) {
     videoEmpty.style.display = 'none';
   }
+
+ 
+  (function initGallery(){
+    const galleryVideos = document.querySelectorAll('[data-gallery-video]');
+    if (!galleryVideos.length) return;
+
+    galleryVideos.forEach(v => {
+      const source = v.querySelector('source');
+      const hasSrc = !!(source && source.getAttribute('src') && source.getAttribute('src').trim() !== '');
+      const empty = v.parentElement.querySelector('.gallery-empty');
+      if (hasSrc && empty) empty.style.display = 'none';
+      v.dataset.hasSrc = hasSrc ? '1' : '0';
+    });
+
+    const galleryIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const vid = entry.target;
+        if (vid.dataset.hasSrc !== '1') return;
+        if (entry.isIntersecting) {
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 200px' });
+
+    galleryVideos.forEach(v => galleryIO.observe(v));
+  })();
+
+  (function initGalleryCaptions(){
+    const cards = document.querySelectorAll('#galleryTrack .gallery-card');
+    if (!cards.length) return;
+
+    const captions = [
+      {
+        title: 'Sector 01 · Flood',
+        copy: 'Aerial footage showing rising water across low-lying riverbanks and exposed road edges.'
+      },
+      {
+        title: 'Sector 02 · Landslide',
+        copy: 'Slope failure and debris movement captured along unstable terrain after heavy rainfall.'
+      },
+      {
+        title: 'Sector 03 · Drone Sweep',
+        copy: 'Wide perimeter scan from a drone pass used to confirm spread and isolate active hotspots.'
+      },
+      {
+        title: 'Sector 04 · Satellite',
+        copy: 'Composite satellite coverage highlighting large-scale cloud breaks and broad hazard extent.'
+      },
+      {
+        title: 'Sector 05 · Riverine',
+        copy: 'River overflow monitoring focused on embankments, crossings, and nearby exposed assets.'
+      },
+      {
+        title: 'Sector 06 · Slope Watch',
+        copy: 'Persistent hillside observation used to spot fresh cracks, soil movement, and drainage stress.'
+      },
+    ];
+
+    cards.forEach((card, index) => {
+      if (card.querySelector('.gallery-card-caption')) return;
+
+      const data = captions[index % captions.length];
+      const caption = document.createElement('div');
+      caption.className = 'gallery-card-caption';
+      caption.innerHTML =
+        '<span class="card-title">' + data.title + '</span>' +
+        '<span class="card-copy">' + data.copy + '</span>';
+
+      const empty = card.querySelector('.gallery-empty');
+      if (empty) {
+        card.insertBefore(caption, empty);
+      } else {
+        card.appendChild(caption);
+      }
+    });
+  })();
+
+  (function initVisualIntelligenceGallery(){
+    const VIDEO_DATA = [
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        poster: '',
+        title: 'Flood Detection',
+        desc: 'AI-assisted detection of flood-affected regions from aerial imagery.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        poster: '',
+        title: 'Wildfire Monitoring',
+        desc: 'Real-time tracking of active burn perimeters from satellite feeds.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        poster: '',
+        title: 'Traffic Flow Analysis',
+        desc: 'Vehicle counting and congestion pattern recognition across intersections.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+        poster: '',
+        title: 'Crop Health Mapping',
+        desc: 'Multispectral analysis identifying stressed vegetation across farmland.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        poster: '',
+        title: 'Urban Change Detection',
+        desc: 'Comparing time-series imagery to flag new construction and land-use shifts.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+        poster: '',
+        title: 'Maritime Surveillance',
+        desc: 'Vessel classification and route anomaly detection across open water.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        poster: '',
+        title: 'Infrastructure Inspection',
+        desc: 'Automated defect flagging on bridges, pipelines, and transmission lines.'
+      },
+      {
+        src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        poster: '',
+        title: 'Anomaly Detection',
+        desc: 'Surfacing statistically unusual events across continuous sensor streams.'
+      }
+    ];
+
+    const track = document.getElementById('vi-track');
+    const carousel = document.getElementById('vi-carousel');
+    if (!track || !carousel) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function buildCard(item, isDuplicate, index) {
+      const li = document.createElement('li');
+      li.className = 'vi-card';
+      if (isDuplicate) li.setAttribute('aria-hidden', 'true');
+
+      const indexLabel = String(index + 1).padStart(2, '0');
+
+      li.innerHTML = `
+        <div class="vi-video-frame">
+          <video
+            class="vi-video"
+            muted
+            loop
+            playsinline
+            preload="none"
+            ${item.poster ? `poster="${item.poster}"` : ''}
+            data-src="${item.src}"
+            ${isDuplicate ? 'tabindex="-1"' : ''}
+          ></video>
+          <div class="vi-frame-marks" aria-hidden="true">
+            <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+          </div>
+          <div class="vi-index-tag">FEED ${indexLabel}</div>
+          <div class="vi-view-tag">View</div>
+        </div>
+        <div class="vi-caption">
+          <div class="vi-caption-text">
+            <p class="vi-caption-title">${item.title}</p>
+            <p class="vi-caption-desc">${item.desc}</p>
+          </div>
+          <span class="vi-caption-index">${indexLabel}</span>
+        </div>
+      `;
+      return li;
+    }
+
+    const fragmentOriginal = document.createDocumentFragment();
+    const fragmentDuplicate = document.createDocumentFragment();
+    VIDEO_DATA.forEach((item, index) => {
+      fragmentOriginal.appendChild(buildCard(item, false, index));
+      fragmentDuplicate.appendChild(buildCard(item, true, index));
+    });
+    track.appendChild(fragmentOriginal);
+    track.appendChild(fragmentDuplicate);
+
+    const videos = Array.from(track.querySelectorAll('.vi-video'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting) {
+          if (!video.src && video.dataset.src) {
+            video.src = video.dataset.src;
+            video.load();
+          }
+          const playPromise = video.play();
+          if (playPromise !== undefined) playPromise.catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+    }, { root: null, rootMargin: '0px', threshold: 0.15 });
+
+    videos.forEach((video) => io.observe(video));
+
+    function pause() { carousel.classList.add('vi-paused'); }
+    function resume() { carousel.classList.remove('vi-paused'); }
+    carousel.addEventListener('mouseenter', pause);
+    carousel.addEventListener('mouseleave', resume);
+    carousel.addEventListener('focusin', pause);
+    carousel.addEventListener('focusout', resume);
+
+    const PIXELS_PER_SECOND = 32;
+    function setDynamicDuration() {
+      const setWidth = track.scrollWidth / 2;
+      const duration = Math.max(setWidth / PIXELS_PER_SECOND, 20);
+      track.style.animationDuration = duration + 's';
+    }
+
+    if (prefersReducedMotion) {
+      carousel.classList.add('vi-reduced-motion');
+    } else {
+      window.requestAnimationFrame(setDynamicDuration);
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(setDynamicDuration, 200);
+      });
+    }
+  })();
 </script>
 
 </body>
