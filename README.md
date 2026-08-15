@@ -43,6 +43,8 @@ The proposed system accepts drone or aerial video feeds, processes frames throug
 
 The central objective is to reduce the information bottleneck faced by emergency teams when multiple disaster feeds must be monitored simultaneously.
 
+![](https://i.postimg.cc/tRFJFvXM/Screenshot-2026-08-15-203221.png)
+
 > **Precision Vision for Rapid Crisis Response**
 
 ---
