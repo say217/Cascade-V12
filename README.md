@@ -63,7 +63,7 @@ The central objective is to reduce the information bottleneck faced by emergency
 | <img src="https://github.com/user-attachments/assets/0331c492-fc5d-4b2b-abae-30276bfef8a2" width="400"> | <img src="https://github.com/user-attachments/assets/78218063-ac20-4ea6-a6ae-4a7e9f8b7f15" width="400"> |
 
 
-
+**For More Info Check it out** -- https://github.com/say217/Land-Slide-Detection-Engine
 
 Floods and landslides generate rapidly changing conditions, particularly in geographically vulnerable regions such as North Bengal and other mountainous and riverine areas.
 
