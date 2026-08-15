@@ -43,7 +43,11 @@ The proposed system accepts drone or aerial video feeds, processes frames throug
 
 The central objective is to reduce the information bottleneck faced by emergency teams when multiple disaster feeds must be monitored simultaneously.
 
-![](https://i.postimg.cc/1tQdNzmT/Screenshot-2026-08-15-204415.png)
+
+| **AI Flood Detection system dashbored** |
+|:---:|
+| <img width="866" height="410" alt="Screenshot 2026-08-08 115459" src="https://i.postimg.cc/W1y3dkMF/Screenshot-2026-08-16-002731.png" /> | 
+
 
 > **Precision Vision for Rapid Crisis Response**
 

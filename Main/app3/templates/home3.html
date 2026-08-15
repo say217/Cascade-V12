@@ -202,6 +202,7 @@
     }
 
     .video-frame {
+      position: relative;
       background: #000;
       aspect-ratio: 16 / 9;
       display: flex;
@@ -214,6 +215,195 @@
       height: 100%;
       object-fit: contain;
       display: block;
+    }
+
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-dim);
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      padding: 6px 12px 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    }
+
+    .upload-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .upload-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      color: var(--text-faint);
+      border-color: var(--border);
+    }
+
+    .upload-btn svg {
+      flex-shrink: 0;
+    }
+
+    /* overlay shown on BOTH video panels while a newly uploaded video is
+       being opened + synced, so the user never sees stale detections from
+       the previous video drawn over the new one */
+    .video-loading {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(10, 10, 10, 0.82);
+      color: var(--text-dim);
+      font-size: 12.5px;
+      font-weight: 500;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .video-loading.active {
+      display: flex;
+    }
+
+    .live-badge.idle {
+      color: var(--text-faint);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .live-badge.idle .live-dot {
+      background: var(--text-faint);
+      animation: none;
+      box-shadow: none;
+    }
+
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(59, 108, 240, 0.25);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .idle-icon {
+      display: none;
+      color: var(--text-faint);
+    }
+
+    .video-loading.idle .spinner {
+      display: none;
+    }
+
+    .video-loading.idle .idle-icon {
+      display: block;
+    }
+
+    .video-loading .upload-cta {
+      display: none;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .video-loading.idle .upload-cta {
+      display: inline;
+    }
+
+    /* ---------- Log panel ---------- */
+    .log-panel {
+      grid-column: 1 / -1;
+    }
+
+    .log-panel .panel-header {
+      /* slightly tighter than video headers so the whole block reads as
+         a status strip rather than another big media panel */
+      padding: 12px 18px;
+    }
+
+    .log-count {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-body {
+      max-height: 240px;
+      min-height: 160px;
+      overflow-y: auto;
+      padding: 10px 18px;
+      background: #0a0a0a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .log-line {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-dim);
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .log-line:last-child {
+      border-bottom: none;
+    }
+
+    .log-line.log-hit {
+      color: #ff9a6e;
+    }
+
+    .log-line.log-clear {
+      color: var(--text-faint);
+    }
+
+    .log-line.log-error {
+      color: #e07a5f;
+      font-weight: 600;
+    }
+
+    .log-line.log-info {
+      color: var(--accent);
+    }
+
+    .log-empty {
+      color: var(--text-faint);
+      font-size: 12px;
+      padding: 6px 0;
+    }
+
+    /* thin, unobtrusive scrollbar for the log console */
+    .log-body::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .log-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 999px;
+    }
+
+    .log-body::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     /* ---------- Chat panel ---------- */
@@ -400,19 +590,45 @@
   </header>
 
   <main class="layout">
-    <!-- LEFT: video windows -->
+    <!-- LEFT: video windows + log console -->
     <section class="left-col">
 
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">
             <span class="name">Detection Feed</span>
-            <span class="sub">Bounding boxes · YOLO segmentation model</span>
+            <span class="sub" id="videoSubLabel">Bounding boxes · YOLO segmentation model</span>
           </div>
-          <div class="live-badge"><span class="live-dot"></span>Live</div>
+          <div class="panel-actions">
+            <button class="upload-btn" id="uploadBtn" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span id="uploadBtnLabel">Upload video</span>
+            </button>
+            <input type="file" id="uploadInput"
+              accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm" hidden />
+            <div class="live-badge idle" id="liveBadgeBoxes">
+              <span class="live-dot"></span><span class="live-label">Idle</span>
+            </div>
+          </div>
         </div>
         <div class="video-frame">
           <img src="/app3/video_feed_boxes" alt="Live detection stream with bounding boxes" />
+          <div class="video-loading idle active" id="videoLoadingBoxes">
+            <div class="spinner"></div>
+            <svg class="idle-icon" width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor"
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Upload a video to start detection</span>
+            <span class="upload-cta" id="idleUploadCta">Choose a file →</span>
+          </div>
         </div>
       </div>
 
@@ -422,10 +638,38 @@
             <span class="name">Segmentation Overlay</span>
             <span class="sub">Bounding boxes + flood mask overlay</span>
           </div>
-          <div class="live-badge"><span class="live-dot"></span>Live</div>
+          <div class="live-badge idle" id="liveBadgeSeg">
+            <span class="live-dot"></span><span class="live-label">Idle</span>
+          </div>
         </div>
         <div class="video-frame">
           <img src="/app3/video_feed_seg" alt="Live detection stream with segmentation overlay" />
+          <div class="video-loading idle active" id="videoLoadingSeg">
+            <div class="spinner"></div>
+            <svg class="idle-icon" width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor"
+                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Upload a video to start detection</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel log-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="name">Detection Logs</span>
+            <span class="sub">flood_seg_logs · last 2000 lines, newest at bottom</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="log-count" id="logCount"></span>
+            <div class="live-badge"><span class="live-dot"></span>Live</div>
+          </div>
+        </div>
+        <div class="log-body" id="logBody">
+          <div class="log-empty">Waiting for log entries…</div>
         </div>
       </div>
 
@@ -519,6 +763,243 @@
         chatInput.focus();
       });
     });
+
+    // ---------- Live detection log panel ----------
+    // Polls GET /app3/logs, which returns the tail of the flood_seg_logs
+    // file written by app3/detection.py. Auto-scrolls to the newest line
+    // unless the user has scrolled up to read older entries.
+    const logBody = document.getElementById('logBody');
+    const logCount = document.getElementById('logCount');
+    let logAutoScroll = true;
+    let lastLogSignature = '';
+
+    logBody.addEventListener('scroll', () => {
+      const distanceFromBottom = logBody.scrollHeight - logBody.scrollTop - logBody.clientHeight;
+      logAutoScroll = distanceFromBottom < 40;
+    });
+
+    function classifyLogLine(line) {
+      if (line.includes('ERROR')) return 'log-error';
+      if (line.includes('no flood detected')) return 'log-clear';
+      if (line.includes('Detection:')) return 'log-hit';
+      return 'log-info';
+    }
+
+    function renderLogs(lines) {
+      // Skip re-render if nothing changed, to avoid resetting scroll
+      // position / flashing every poll interval.
+      const signature = lines.length + '|' + (lines[lines.length - 1] || '');
+      if (signature === lastLogSignature) return;
+      lastLogSignature = signature;
+
+      logBody.innerHTML = '';
+
+      if (!lines.length) {
+        const empty = document.createElement('div');
+        empty.className = 'log-empty';
+        empty.textContent = 'No log entries yet…';
+        logBody.appendChild(empty);
+        logCount.textContent = '';
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      lines.forEach((line) => {
+        const div = document.createElement('div');
+        div.className = 'log-line ' + classifyLogLine(line);
+        div.textContent = line;
+        fragment.appendChild(div);
+      });
+      logBody.appendChild(fragment);
+      logCount.textContent = lines.length + ' lines';
+
+      if (logAutoScroll) {
+        logBody.scrollTop = logBody.scrollHeight;
+      }
+    }
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/app3/logs?limit=200');
+        if (!res.ok) return;
+        const data = await res.json();
+        renderLogs(data.logs || []);
+      } catch (err) {
+        // Silent failure - keep whatever logs are already on screen and
+        // just try again on the next poll.
+      }
+    }
+
+    fetchLogs();
+    setInterval(fetchLogs, 2000);
+
+    // ---------- AI Alerts Polling ----------
+    let lastAlertId = 0;
+    let initialAlertsLoaded = false;
+    
+    async function fetchAlerts() {
+      try {
+        const res = await fetch('/app3/alerts?since_id=' + lastAlertId);
+        if (!res.ok) return;
+        const data = await res.json();
+        const alerts = data.alerts || [];
+        
+        if (!initialAlertsLoaded) {
+          if (alerts.length > 0) {
+            lastAlertId = Math.max(...alerts.map(a => a.id));
+          }
+          initialAlertsLoaded = true;
+          return;
+        }
+        
+        alerts.forEach(alert => {
+          if (alert.id > lastAlertId) {
+            lastAlertId = alert.id;
+            addMessage(alert.message, 'assistant');
+          }
+        });
+      } catch (err) {
+        // Silent fail
+      }
+    }
+    
+    fetchAlerts();
+    setInterval(fetchAlerts, 3000);
+
+
+    // ---------- Video upload ----------
+    // Flow: pick a file -> POST it to /app3/upload_video (which saves it
+    // and swaps it in as the active cv2.VideoCapture source) -> poll
+    // GET /app3/status until loading:false. The <img> MJPEG streams never
+    // need to be reloaded - they're just reading whatever frame the
+    // server's playback loop is currently producing. Before any upload,
+    // the server itself streams a static "upload a video" placeholder
+    // frame and never runs inference, so nothing plays or detects until
+    // the user explicitly provides a video.
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadBtnLabel = document.getElementById('uploadBtnLabel');
+    const uploadInput = document.getElementById('uploadInput');
+    const videoSubLabel = document.getElementById('videoSubLabel');
+    const videoLoadingBoxes = document.getElementById('videoLoadingBoxes');
+    const videoLoadingSeg = document.getElementById('videoLoadingSeg');
+    const liveBadgeBoxes = document.getElementById('liveBadgeBoxes');
+    const liveBadgeSeg = document.getElementById('liveBadgeSeg');
+    const idleUploadCta = document.getElementById('idleUploadCta');
+
+    let statusPollTimer = null;
+
+    function setOverlayState(state, message) {
+      // state: 'idle' | 'loading' | 'hidden'
+      [videoLoadingBoxes, videoLoadingSeg].forEach((el) => {
+        el.classList.toggle('active', state !== 'hidden');
+        el.classList.toggle('idle', state === 'idle');
+      });
+      if (message) {
+        [videoLoadingBoxes, videoLoadingSeg].forEach((el) => {
+          const msgSpan = el.querySelector('span:not(.upload-cta)');
+          if (msgSpan) msgSpan.textContent = message;
+        });
+      }
+    }
+
+    function setBadgeState(isLive) {
+      [liveBadgeBoxes, liveBadgeSeg].forEach((badge) => {
+        badge.classList.toggle('idle', !isLive);
+        badge.querySelector('.live-label').textContent = isLive ? 'Live' : 'Idle';
+      });
+    }
+
+    function setUploadBusy(isBusy, label) {
+      uploadBtn.disabled = isBusy;
+      uploadBtnLabel.textContent = label || (isBusy ? 'Uploading…' : 'Upload video');
+    }
+
+    async function checkInitialStatus() {
+      try {
+        const res = await fetch('/app3/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.has_video && !data.loading) {
+          setOverlayState('hidden');
+          setBadgeState(true);
+          if (data.video_name) {
+            videoSubLabel.textContent = `Bounding boxes · ${data.video_name}`;
+          }
+        } else {
+          // No video uploaded yet in this server session - stay idle.
+          setOverlayState('idle');
+          setBadgeState(false);
+        }
+      } catch (err) {
+        // If the status check fails, default to the idle prompt rather
+        // than silently implying a video is playing.
+        setOverlayState('idle');
+        setBadgeState(false);
+      }
+    }
+
+    async function pollStatusUntilReady() {
+      clearInterval(statusPollTimer);
+      statusPollTimer = setInterval(async () => {
+        try {
+          const res = await fetch('/app3/status');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.loading && data.has_video) {
+            clearInterval(statusPollTimer);
+            setOverlayState('hidden');
+            setBadgeState(true);
+            setUploadBusy(false);
+            if (data.video_name) {
+              videoSubLabel.textContent = `Bounding boxes · ${data.video_name}`;
+            }
+          }
+        } catch (err) {
+          // keep polling - a single failed status check isn't fatal
+        }
+      }, 600);
+    }
+
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+    idleUploadCta.addEventListener('click', () => uploadInput.click());
+
+    uploadInput.addEventListener('change', async () => {
+      const file = uploadInput.files && uploadInput.files[0];
+      if (!file) return;
+
+      setUploadBusy(true, 'Uploading…');
+      setOverlayState('loading', 'Uploading video…');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/app3/upload_video', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setOverlayState('idle');
+          setUploadBusy(false);
+          addMessage(`Upload failed: ${data.error || 'unknown error'}`, 'assistant');
+          return;
+        }
+
+        // Backend has swapped the video source in; now wait for the
+        // playback/inference threads to finish syncing to it before
+        // dropping the overlay and flipping the badges to Live.
+        setUploadBusy(true, 'Syncing…');
+        setOverlayState('loading', 'Loading model & video…');
+        pollStatusUntilReady();
+      } catch (err) {
+        setOverlayState('idle');
+        setUploadBusy(false);
+        addMessage('Upload failed: could not reach the server.', 'assistant');
+      } finally {
+        uploadInput.value = '';
+      }
+    });
+
+    checkInitialStatus();
   </script>
 
 </body>
