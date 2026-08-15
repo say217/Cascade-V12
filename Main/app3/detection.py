@@ -1,12 +1,24 @@
+"""
+Flood detection engine for App 3.
+
+This mirrors your original standalone script's model/video protocol as
+closely as possible - same ROOT_DIR/model_path/video_path setup, same
+predict_tiles / draw_boxes / draw_masks functions, same single-lock
+inference_worker background thread. The only real change is swapping the
+two cv2.imshow windows for two in-memory JPEG buffers that FastAPI streams
+to the browser instead (a server has no display to imshow onto).
+"""
+
 import os
 import threading
 import time
+
 import cv2
 import numpy as np
 from ultralytics import YOLO
 
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 model_path = os.path.join(ROOT_DIR, '.model', 'flood segment_model_.pt')
 video_path = os.path.join(
     ROOT_DIR,
@@ -20,14 +32,18 @@ CONF_THRES = 0.35
 IOU_THRES = 0.45
 MAX_BOX_AREA_FRAC = 0.25         # ignore any single box bigger than 25% of frame
 INFER_IMGSZ = 480                # smaller = faster on CPU, less accurate (try 320-640)
-FEED_EVERY_N_FRAMES = 6        
-DISPLAY_WIDTH = 700             
+FEED_EVERY_N_FRAMES = 6
+JPEG_QUALITY = 80                # quality of the frames streamed to the browser
+
+BOX_COLOR = (0, 69, 255)         # BGR - reddish orange bounding box outline
+BAR_FILL_COLOR = (0, 69, 255)    # BGR - reddish orange confidence-bar fill
+MASK_COLOR = np.array([255, 165, 0], dtype=np.uint8)  # BGR orange segmentation overlay
 
 
-print("Loading model...")
+print("[app3.detection] Loading model...")
 model = YOLO(model_path)
 
-print("Opening video...")
+print("[app3.detection] Opening video...")
 cap = cv2.VideoCapture(video_path)
 if not cap.isOpened():
     raise IOError(f"Could not open video: {video_path}")
@@ -36,17 +52,7 @@ fps = cap.get(cv2.CAP_PROP_FPS) or 25
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 frame_area = width * height
-frame_delay_ms = max(1, int(1000 / fps))
-
-scale = DISPLAY_WIDTH / width
-disp_w, disp_h = DISPLAY_WIDTH, int(height * scale)
-
-WIN_DET = "Flood Detection - Bounding Boxes"
-WIN_SEG = "Flood Detection - Boxes + Segmentation"
-cv2.namedWindow(WIN_DET, cv2.WINDOW_NORMAL)
-cv2.namedWindow(WIN_SEG, cv2.WINDOW_NORMAL)
-cv2.resizeWindow(WIN_DET, disp_w, disp_h)
-cv2.resizeWindow(WIN_SEG, disp_w, disp_h)
+frame_delay = 1 / fps if fps else 0.04
 
 
 def predict_tiles(frame):
@@ -95,7 +101,7 @@ def draw_boxes(frame, boxes):
     for box in boxes:
         x1, y1, x2, y2, conf = box
 
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 255), thickness=1)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, thickness=1)
 
         label_text = f"flood {conf * 100:.1f}%"
         (text_w, text_h), baseline = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.35, 1)
@@ -112,7 +118,7 @@ def draw_boxes(frame, boxes):
         bar_max_width = 25
         bar_width = int(bar_max_width * conf)
         cv2.rectangle(frame, (bar_x_start, text_y - text_h + 2), (bar_x_start + bar_max_width, text_y - text_h + 7), (85, 85, 85), -1)
-        cv2.rectangle(frame, (bar_x_start, text_y - text_h + 2), (bar_x_start + bar_width, text_y - text_h + 7), (255, 255, 255), -1)
+        cv2.rectangle(frame, (bar_x_start, text_y - text_h + 2), (bar_x_start + bar_width, text_y - text_h + 7), BAR_FILL_COLOR, -1)
 
     return frame
 
@@ -123,23 +129,12 @@ def draw_masks(frame, masks):
         return frame.copy()
     frame = frame.copy()
     overlay = frame.copy()
-    mask_color = np.array([255, 165, 0], dtype=np.uint8)  # BGR orange
     for mask in masks:
-        overlay[mask] = mask_color
+        overlay[mask] = MASK_COLOR
     cv2.addWeighted(overlay, 0.35, frame, 0.65, 0, dst=frame)
     return frame
 
 
-# ============================================================
-# BACKGROUND INFERENCE WORKER
-# ============================================================
-# The model runs in its own thread so a slow CPU inference pass never
-# blocks the video from decoding/displaying the next frame. The worker
-# always grabs the MOST RECENT frame handed to it - if it's still busy
-# when a newer frame arrives, the older one is simply dropped - so it
-# never builds up a backlog, it just gives you the freshest detection
-# it can keep up with. This is what actually fixes the stutter: the
-# video loop below never waits on the model at all.
 
 _lock = threading.Lock()
 _pending_frame = None       # next frame waiting to be picked up by the worker
@@ -147,6 +142,12 @@ _latest_boxes = []
 _latest_masks = []
 _latest_update_time = None
 _stop_flag = False
+
+# Latest encoded JPEG for each of the two "windows". Your original script
+# pushed these straight to cv2.imshow; here they're read by the MJPEG
+# stream endpoints in app3/routes.py instead.
+_det_jpeg = None
+_seg_jpeg = None
 
 
 def inference_worker():
@@ -173,24 +174,35 @@ worker.start()
 
 
 # ============================================================
-# MAIN LOOP - live playback, two windows, never blocks on the model
+# PLAYBACK LOOP - same protocol as your original main loop (read frame,
+# feed every Nth frame to the worker, draw both windows, HUD "detections:
+# X s old" text). Runs in its own background thread since a server can't
+# block on a while True loop the way your script's main thread did, and
+# encodes to JPEG instead of calling cv2.imshow.
 # ============================================================
-frame_idx = 0
-paused = False
+def _encode(frame):
+    ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
+    return buf.tobytes() if ok else None
 
-print("Starting playback.")
-print("  'q' = quit   |   'p' = pause/resume")
 
-while True:
-    if not paused:
+def playback_loop():
+    global _pending_frame, _det_jpeg, _seg_jpeg
+    frame_idx = 0
+
+    while not _stop_flag:
         ret, frame = cap.read()
         if not ret:
-            print("End of video.")
-            break
+            # Your original script printed "End of video." and stopped here.
+            # A live dashboard needs to keep streaming, so this loops back
+            # to the start instead of going dark - the one deliberate
+            # behavior change from your script.
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            frame_idx = 0
+            continue
 
         # Hand every Nth frame to the background detector thread. We never
-        # wait for a result here - the display loop always runs at normal
-        # speed no matter how slow the CPU is at inference.
+        # wait for a result here - playback keeps moving at normal speed no
+        # matter how slow the CPU is at inference.
         if frame_idx % FEED_EVERY_N_FRAMES == 0:
             with _lock:
                 _pending_frame = frame.copy()
@@ -198,26 +210,57 @@ while True:
         with _lock:
             boxes, masks, updated_at = _latest_boxes, _latest_masks, _latest_update_time
 
-        det_frame = draw_boxes(frame, boxes)              # window 1: boxes only
-        seg_frame = draw_masks(det_frame, masks)           # window 2: boxes + segmentation
+        det_frame = draw_boxes(frame, boxes)               # window 1: boxes only
+        seg_frame = draw_masks(det_frame, masks)            # window 2: boxes + segmentation
 
         if updated_at is not None:
             age_s = time.time() - updated_at
             cv2.putText(det_frame, f"detections: {age_s:.1f}s old", (10, 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
-        cv2.imshow(WIN_DET, cv2.resize(det_frame, (disp_w, disp_h)))
-        cv2.imshow(WIN_SEG, cv2.resize(seg_frame, (disp_w, disp_h)))
+        det_jpeg = _encode(det_frame)
+        seg_jpeg = _encode(seg_frame)
+
+        with _lock:
+            if det_jpeg is not None:
+                _det_jpeg = det_jpeg
+            if seg_jpeg is not None:
+                _seg_jpeg = seg_jpeg
 
         frame_idx += 1
+        time.sleep(frame_delay)
 
-    key = cv2.waitKey(1 if paused else frame_delay_ms) & 0xFF
-    if key == ord('q'):
-        break
-    elif key == ord('p'):
-        paused = not paused
 
-_stop_flag = True
-worker.join(timeout=1)
-cap.release()
-cv2.destroyAllWindows()
+playback = threading.Thread(target=playback_loop, daemon=True)
+playback.start()
+
+
+# ============================================================
+# PUBLIC API used by app3/routes.py
+# ============================================================
+def stop_detection():
+    """Call on app shutdown to stop both background threads and release the video."""
+    global _stop_flag
+    _stop_flag = True
+    worker.join(timeout=1)
+    playback.join(timeout=1)
+    cap.release()
+
+
+def mjpeg_generator(stream: str = "boxes"):
+    """
+    Yields multipart/x-mixed-replace chunks for either the "boxes" stream
+    (WIN_DET equivalent) or the "seg" stream (WIN_SEG equivalent), always
+    the freshest frame the playback loop has produced.
+    """
+    while not _stop_flag:
+        with _lock:
+            jpeg = _det_jpeg if stream == "boxes" else _seg_jpeg
+
+        if jpeg is not None:
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n"
+            )
+
+        time.sleep(1 / 30)
