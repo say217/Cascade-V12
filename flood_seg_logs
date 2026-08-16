@@ -1,3 +1,20 @@
-[2026-08-16 15:45:19] Loading model...
-[2026-08-16 15:45:20] Model loaded from C:\PROJECTS\Flood Dtection model\.model\flood segment_model_.pt
-[2026-08-16 15:45:23] Detection stopped, video released
+[2026-08-16 17:18:38] Loading uploaded video: 04ca4d66af48459db0664e9bd78e4cb3.mp4
+[2026-08-16 17:18:38] Video source switched to 04ca4d66af48459db0664e9bd78e4cb3.mp4 (1280x720 @ 25.0fps) - model already warm, playback resumed
+[2026-08-16 17:18:50] Detection: 2 box(es), 2 mask(s), avg_conf=0.64
+[2026-08-16 17:18:57] Detection: 4 box(es), 4 mask(s), avg_conf=0.61
+[2026-08-16 17:19:02] Detection: 4 box(es), 4 mask(s), avg_conf=0.67
+[2026-08-16 17:19:08] Detection: no flood detected, 0 mask(s)
+[2026-08-16 17:19:13] Detection: 1 box(es), 1 mask(s), avg_conf=0.40
+[2026-08-16 17:19:18] Detection: 2 box(es), 2 mask(s), avg_conf=0.44
+[2026-08-16 17:19:24] Detection: 1 box(es), 2 mask(s), avg_conf=0.68
+[2026-08-16 17:19:32] Detection: 2 box(es), 3 mask(s), avg_conf=0.44
+[2026-08-16 17:19:39] Detection: 2 box(es), 2 mask(s), avg_conf=0.42
+[2026-08-16 17:19:48] Detection: 1 box(es), 1 mask(s), avg_conf=0.70
+[2026-08-16 17:19:52] Detection: 2 box(es), 2 mask(s), avg_conf=0.60
+[2026-08-16 17:19:54] Detection: 1 box(es), 1 mask(s), avg_conf=0.35
+[2026-08-16 17:19:56] Detection: 2 box(es), 3 mask(s), avg_conf=0.47
+[2026-08-16 17:20:01] Detection: 3 box(es), 3 mask(s), avg_conf=0.54
+[2026-08-16 17:20:04] Detection: 2 box(es), 2 mask(s), avg_conf=0.60
+[2026-08-16 17:20:07] Detection: 3 box(es), 3 mask(s), avg_conf=0.70
+[2026-08-16 17:20:11] Detection: 3 box(es), 3 mask(s), avg_conf=0.66
+[2026-08-16 17:20:11] Detection stopped, video released

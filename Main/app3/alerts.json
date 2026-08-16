@@ -1,0 +1,44 @@
+[
+  {
+    "timestamp": "2026-08-16T17:18:50.288949",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.7245, Lon 88.2213.\nImmediate attention recommended.",
+    "boxes_count": 2,
+    "id": 1786880930290
+  },
+  {
+    "timestamp": "2026-08-16T17:19:02.869615",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.705, Lon 88.564.\nImmediate attention recommended.",
+    "boxes_count": 4,
+    "id": 1786880942869
+  },
+  {
+    "timestamp": "2026-08-16T17:19:13.696182",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.2448, Lon 88.5675.\nImmediate attention recommended.",
+    "boxes_count": 1,
+    "id": 1786880953696
+  },
+  {
+    "timestamp": "2026-08-16T17:19:24.809627",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.9664, Lon 88.0249.\nImmediate attention recommended.",
+    "boxes_count": 1,
+    "id": 1786880964809
+  },
+  {
+    "timestamp": "2026-08-16T17:19:39.561733",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.1361, Lon 88.6551.\nImmediate attention recommended.",
+    "boxes_count": 2,
+    "id": 1786880979561
+  },
+  {
+    "timestamp": "2026-08-16T17:19:52.140150",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.2859, Lon 88.854.\nImmediate attention recommended.",
+    "boxes_count": 2,
+    "id": 1786880992140
+  },
+  {
+    "timestamp": "2026-08-16T17:20:04.922564",
+    "message": "\ud83d\udea8 ALERT: Potential major flood area detected.\nLocation: Lat 26.6333, Lon 88.8585.\nImmediate attention recommended.",
+    "boxes_count": 2,
+    "id": 1786881004922
+  }
+]
