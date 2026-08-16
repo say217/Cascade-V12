@@ -53,9 +53,9 @@ The central objective is to reduce the information bottleneck faced by emergency
 
 ---
 
-| **Flood Detection** |
+| **Landslide Detection** |
 |:---:|
-| <img width="866" height="410" alt="Screenshot 2026-08-08 115459" src="https://github.com/user-attachments/assets/6f64a8a8-5329-4062-8fcc-6dd0a51e1cc3" /> | 
+| <img width="866" height="410" alt="Screenshot 2026-08-08 115459" src="https://i.postimg.cc/vZ1Ry8t5/Screenshot-2026-08-16-154450.png" /> | 
 
 
 | **Landslide Detection** | **Image segment** |
